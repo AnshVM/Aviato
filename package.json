@@ -1,0 +1,34 @@
+{
+  "name": "aviato",
+  "private":true,
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "workspaces": [
+    "examples/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "lerna run build --scope aviato",
+    "watch": "lerna run watch --scope aviato",
+    "package": "lerna exec --scope aviato -- npm pack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AnshVM/Aviato.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AnshVM/Aviato/issues"
+  },
+  "homepage": "https://github.com/AnshVM/Aviato#readme",
+  "dependencies": {
+    "@types/react": "^17.0.38",
+    "@types/react-dom": "^17.0.11",
+    "lerna": "^4.0.0",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2"
+  }
+}
