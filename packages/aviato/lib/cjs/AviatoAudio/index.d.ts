@@ -14,5 +14,6 @@ declare class AviatoAudio {
     play(): void;
     pause(): void;
     trim(trimValues: trimValues): void;
+    append(audio: AviatoAudio): void;
 }
 export default AviatoAudio;

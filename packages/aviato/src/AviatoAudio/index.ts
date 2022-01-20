@@ -91,6 +91,32 @@ class AviatoAudio {
         newAudioNode.connect(this.audioContext.destination);
         this.audioNode = newAudioNode;
     }
+
+    append(audio:AviatoAudio){
+        const length = this.audioBuffer.length + audio.audioBuffer.length;
+        const numOfChannels = Math.min(this.audioBuffer.numberOfChannels,audio.audioBuffer.numberOfChannels);
+        const newArrayBuffer = this.audioContext.createBuffer(numOfChannels,length,this.audioBuffer.sampleRate);
+
+        for(let i=0;i<numOfChannels;i++) {
+            let newBufferChannelData = newArrayBuffer.getChannelData(i);
+            let thisAudioChannelData = this.audioBuffer.getChannelData(i);
+            let secondAudioChannelData = audio.audioBuffer.getChannelData(i);
+            let j=0;
+            for(j=0;j<this.audioBuffer.length;j++){
+                newBufferChannelData[j] = thisAudioChannelData[j];
+            }
+            for(let k=0;k<audio.audioBuffer.length;k++) {
+                newBufferChannelData[j] = secondAudioChannelData[k];
+                j++;
+            }
+        }
+        this.audioBuffer = newArrayBuffer;
+        this.audioNode.disconnect();
+        const newAudioNode = this.audioContext.createBufferSource();
+        newAudioNode.buffer = newArrayBuffer;
+        newAudioNode.connect(this.audioContext.destination);
+        this.audioNode = newAudioNode;
+    }
 }
 
 export default AviatoAudio;

@@ -80,6 +80,30 @@ var AviatoAudio = /** @class */ (function () {
         newAudioNode.connect(this.audioContext.destination);
         this.audioNode = newAudioNode;
     };
+    AviatoAudio.prototype.append = function (audio) {
+        var length = this.audioBuffer.length + audio.audioBuffer.length;
+        var numOfChannels = Math.min(this.audioBuffer.numberOfChannels, audio.audioBuffer.numberOfChannels);
+        var newArrayBuffer = this.audioContext.createBuffer(numOfChannels, length, this.audioBuffer.sampleRate);
+        for (var i = 0; i < numOfChannels; i++) {
+            var newBufferChannelData = newArrayBuffer.getChannelData(i);
+            var thisAudioChannelData = this.audioBuffer.getChannelData(i);
+            var secondAudioChannelData = audio.audioBuffer.getChannelData(i);
+            var j = 0;
+            for (j = 0; j < this.audioBuffer.length; j++) {
+                newBufferChannelData[j] = thisAudioChannelData[j];
+            }
+            for (var k = 0; k < audio.audioBuffer.length; k++) {
+                newBufferChannelData[j] = secondAudioChannelData[k];
+                j++;
+            }
+        }
+        this.audioBuffer = newArrayBuffer;
+        this.audioNode.disconnect();
+        var newAudioNode = this.audioContext.createBufferSource();
+        newAudioNode.buffer = newArrayBuffer;
+        newAudioNode.connect(this.audioContext.destination);
+        this.audioNode = newAudioNode;
+    };
     return AviatoAudio;
 }());
 
