@@ -1,14 +1,3 @@
-class Person {
-    name:String;
-    constructor (name:String) {
-        this.name = name
-    }
-    getName():String {
-        return this.name;
-    }
-    setName(newName:String) {
-        this.name = newName;
-    }
-}
+import AviatoAudio from './AviatoAudio/index';
 
-export default Person;
+exports.AviatoAudio = AviatoAudio;
