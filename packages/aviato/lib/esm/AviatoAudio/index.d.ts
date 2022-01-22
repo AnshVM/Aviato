@@ -15,5 +15,6 @@ declare class AviatoAudio {
     pause(): void;
     trim(trimValues: trimValues): void;
     append(audio: AviatoAudio): void;
+    convertToMP3(): String;
 }
 export default AviatoAudio;

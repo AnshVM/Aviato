@@ -1,8 +1,10 @@
+const lamejs = require('lamejs')
+
+
 interface trimValues {
     start: String,
     end: String
 }
-
 
 class AviatoAudio {
     audioElement: HTMLAudioElement;
@@ -13,6 +15,7 @@ class AviatoAudio {
     durationInterval:NodeJS.Timer;
 
     constructor(audioElement: HTMLAudioElement) {
+        console.log('made a change')
         this.duration=0;
         this.audioElement = audioElement;
         this.audioContext = new AudioContext();
@@ -25,6 +28,7 @@ class AviatoAudio {
                 this.audioNode = this.audioContext.createBufferSource();
                 this.audioNode.buffer = this.audioBuffer;
                 this.audioNode.connect(this.audioContext.destination);
+                console.log(audioBuffer)
                 console.log("Audio now ready to play")
             })
     }
@@ -116,7 +120,41 @@ class AviatoAudio {
         newAudioNode.buffer = newArrayBuffer;
         newAudioNode.connect(this.audioContext.destination);
         this.audioNode = newAudioNode;
+        console.log("joined")
     }
+
+    convertToMP3():String{
+        const a = new Date();
+        const mp3encoder = new lamejs.Mp3Encoder(2,this.audioBuffer.sampleRate,128);
+        let mp3data = [];
+        const floatLeft = this.audioBuffer.getChannelData(0);
+        const floatRight = this.audioBuffer.getChannelData(1);
+        let left = new Int32Array(floatLeft.length);
+        let right = new Int32Array(floatRight.length);
+        for(let i=0;i<floatLeft.length;i++) {
+            left[i] = floatLeft[i] < 0 ? floatLeft[i] * 32768 : floatLeft[i] * 32767;
+            right[i] = floatRight[i] < 0 ? floatRight[i] * 32768 : floatRight[i] * 32767;
+        }
+        const sampleBlockSize = 576;
+        for(let i=0;i<left.length;i+=sampleBlockSize){
+            const leftChunk = left.subarray(i,i+sampleBlockSize);
+            const rightChunk = right.subarray(i,i+sampleBlockSize);
+            const mp3buf = mp3encoder.encodeBuffer(leftChunk,rightChunk);
+            if(mp3buf.length > 0) {
+                mp3data.push(mp3buf);
+            }
+        }
+        console.log(`Encoding took ${((new Date()).getTime() - a.getTime())/1000} seconds`)
+        const mp3buf = mp3encoder.flush();
+        if(mp3buf.length>0){
+            mp3data.push(mp3buf);
+        }
+        const blob = new Blob(mp3data,{type:'audio/mp3'});
+        const url = window.URL.createObjectURL(blob);
+        console.log("converted")
+        return url
+    }
+
 }
 
 export default AviatoAudio;

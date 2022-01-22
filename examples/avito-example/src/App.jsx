@@ -6,6 +6,7 @@ function App() {
 
   const audio = useRef(null);
   const audio6 = useRef(null);
+  const [mp3,setmp3] = useState()
 
   const handlePlay = () => {
     audio.current.play();
@@ -21,6 +22,10 @@ function App() {
 
   const handleJoin = () => {
     audio.current.append(audio6.current);
+  }
+
+  const convertToMP3 = () => {
+    setmp3(audio.current.convertToMP3())
   }
 
   useEffect(() => {
@@ -41,6 +46,8 @@ function App() {
         <button onClick={handlePause}>Pause</button>
         <button onClick={handleTrim}>Trim</button>
         <button onClick={handleJoin}>Join</button>
+        <button onClick={convertToMP3}>Convert to mp3</button>
+        <audio src={mp3} controls></audio>
     </div>
   );
 }

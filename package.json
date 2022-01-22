@@ -10,8 +10,8 @@
   ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "lerna run build --scope aviato",
-    "watch": "lerna run watch --scope aviato",
+    "build": "lerna run build --scope aviatojs",
+    "watch": "lerna run watch --scope aviatojs",
     "package": "lerna exec --scope aviato -- npm pack"
   },
   "repository": {

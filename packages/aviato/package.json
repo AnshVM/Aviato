@@ -25,5 +25,8 @@
     "rollup": "^2.64.0",
     "rollup-plugin-typescript2": "^0.31.1",
     "typescript": "^4.5.4"
+  },
+  "dependencies": {
+    "lamejs": "^1.2.1"
   }
 }
