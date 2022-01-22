@@ -1,1 +1,1 @@
-export {};
+export { AviatoAudio } from './AviatoAudio/index';

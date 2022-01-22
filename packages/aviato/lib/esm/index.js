@@ -140,4 +140,4 @@ var AviatoAudio = /** @class */ (function () {
     return AviatoAudio;
 }());
 
-exports.AviatoAudio = AviatoAudio;
+export { AviatoAudio };

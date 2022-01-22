@@ -6,7 +6,7 @@ interface trimValues {
     end: String
 }
 
-class AviatoAudio {
+export class AviatoAudio {
     audioElement: HTMLAudioElement;
     audioContext: AudioContext;
     audioNode: AudioBufferSourceNode;
@@ -156,5 +156,3 @@ class AviatoAudio {
     }
 
 }
-
-export default AviatoAudio;

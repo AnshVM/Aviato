@@ -1,3 +1,1 @@
-import AviatoAudio from './AviatoAudio/index';
-
-exports.AviatoAudio = AviatoAudio;
+export {AviatoAudio} from './AviatoAudio/index'

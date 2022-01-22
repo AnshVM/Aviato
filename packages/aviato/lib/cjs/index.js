@@ -1,5 +1,7 @@
 'use strict';
 
+Object.defineProperty(exports, '__esModule', { value: true });
+
 var lamejs = require('lamejs');
 var AviatoAudio = /** @class */ (function () {
     function AviatoAudio(audioElement) {

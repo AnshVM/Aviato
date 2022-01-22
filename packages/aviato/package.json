@@ -14,6 +14,10 @@
     "build": "rollup -c",
     "watch": "rollup -cw"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AnshVM/Aviato"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",

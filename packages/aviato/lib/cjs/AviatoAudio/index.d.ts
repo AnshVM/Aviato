@@ -3,7 +3,7 @@ interface trimValues {
     start: String;
     end: String;
 }
-declare class AviatoAudio {
+export declare class AviatoAudio {
     audioElement: HTMLAudioElement;
     audioContext: AudioContext;
     audioNode: AudioBufferSourceNode;
@@ -17,4 +17,4 @@ declare class AviatoAudio {
     append(audio: AviatoAudio): void;
     convertToMP3(): String;
 }
-export default AviatoAudio;
+export {};
