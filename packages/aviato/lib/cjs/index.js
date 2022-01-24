@@ -63,16 +63,12 @@ var AviatoAudio = /** @class */ (function () {
     };
     AviatoAudio.prototype.trim = function (trimValues) {
         var startIndex = 0, endIndex = 0;
-        console.log(trimValues.start);
         if (typeof (trimValues.start) === 'string' && typeof (trimValues.end) === 'string') {
             var start = parseInt(trimValues.start.substring(0, trimValues.start.length - 1));
             var end = parseInt(trimValues.end.substring(0, trimValues.end.length - 1));
             if (trimValues.start[trimValues.start.length - 1] === 's' && trimValues.end[trimValues.end.length - 1] === 's') {
                 startIndex = Math.floor((start / this.audioBuffer.duration) * this.audioBuffer.length - 1);
                 endIndex = Math.floor((end / this.audioBuffer.duration) * this.audioBuffer.length - 1);
-                console.log('here');
-                console.log(startIndex);
-                console.log(endIndex);
             }
             else if (trimValues.start[trimValues.start.length - 1] === '%' && trimValues.end[trimValues.end.length - 1] === '%') {
                 startIndex = Math.floor((start) / 100 * this.audioBuffer.length);
@@ -80,7 +76,6 @@ var AviatoAudio = /** @class */ (function () {
             }
         }
         else {
-            console.log('here1');
             var start = trimValues.start, end = trimValues.end;
             if (typeof (start) === 'number' && typeof (end) === 'number') {
                 startIndex = Math.floor((start) / 100 * this.audioBuffer.length);
@@ -160,8 +155,49 @@ var AviatoAudio = /** @class */ (function () {
         var url = window.URL.createObjectURL(blob);
         return Promise.resolve(url);
     };
-    AviatoAudio.prototype.newfunc = function () {
-        console.log('newfunc');
+    AviatoAudio.prototype.cut = function (cutValues) {
+        var startIndex = 0, endIndex = 0;
+        if (typeof (cutValues.start) === 'string' && typeof (cutValues.end) === 'string') {
+            var start = parseInt(cutValues.start.substring(0, cutValues.start.length - 1));
+            var end = parseInt(cutValues.end.substring(0, cutValues.end.length - 1));
+            if (cutValues.start[cutValues.start.length - 1] === 's' && cutValues.end[cutValues.end.length - 1] === 's') {
+                startIndex = Math.floor((start / this.audioBuffer.duration) * this.audioBuffer.length - 1);
+                endIndex = Math.floor((end / this.audioBuffer.duration) * this.audioBuffer.length - 1);
+            }
+            else if (cutValues.start[cutValues.start.length - 1] === '%' && cutValues.end[cutValues.end.length - 1] === '%') {
+                startIndex = Math.floor((start) / 100 * this.audioBuffer.length);
+                endIndex = Math.floor((end) / 100 * this.audioBuffer.length);
+            }
+        }
+        else {
+            var start = cutValues.start, end = cutValues.end;
+            if (typeof (start) === 'number' && typeof (end) === 'number') {
+                startIndex = Math.floor((start) / 100 * this.audioBuffer.length);
+                endIndex = Math.floor((end) / 100 * this.audioBuffer.length);
+            }
+        }
+        var channels = this.audioBuffer.numberOfChannels;
+        var length = this.audioBuffer.length - (endIndex - startIndex + 1);
+        var sampleRate = this.audioBuffer.sampleRate;
+        var newArrayBuffer = this.audioContext.createBuffer(channels, length, sampleRate);
+        for (var i = 0; i < channels; i++) {
+            var newBufferChanneData = newArrayBuffer.getChannelData(i);
+            var thisBufferChannelData = this.audioBuffer.getChannelData(i);
+            var k = 0;
+            for (var j = 0; j < thisBufferChannelData.length; j++) {
+                newBufferChanneData[k] = thisBufferChannelData[j];
+                if (j == startIndex - 1)
+                    j = endIndex;
+                k++;
+            }
+        }
+        this.audioBuffer = newArrayBuffer;
+        this.audioNode.disconnect();
+        var newAudioNode = this.audioContext.createBufferSource();
+        newAudioNode.buffer = newArrayBuffer;
+        newAudioNode.connect(this.audioContext.destination);
+        this.audioNode = newAudioNode;
+        console.log(newArrayBuffer);
     };
     return AviatoAudio;
 }());

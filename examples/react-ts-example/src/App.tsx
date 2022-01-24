@@ -37,6 +37,9 @@ function App() {
     audio2.trim({start:"20s",end:"25s"}) //cuts first 20% and the last 25% of the audio file
   }
 
+  const handleCut = () => {
+    audio2.cut({start:'5s',end:'10s'});
+  }
 
   useEffect(()=>{
     if(audio1Element.current && audio1==null) {
@@ -57,6 +60,7 @@ function App() {
       <button onClick={handleTrim}>Trim Audio2</button>
       <button onClick={handlePlayAudio2}>Play audio2</button>
       <button onClick={handlePauseAudio2}>Pause audio2</button>
+      <button onClick={handleCut}>Cut Audio2</button>
     </div>
   );
 }

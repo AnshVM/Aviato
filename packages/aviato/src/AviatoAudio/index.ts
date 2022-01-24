@@ -68,7 +68,6 @@ export class AviatoAudio {
     trim(trimValues:{start:String|number,end:String|number}) {
 
         let startIndex=0,endIndex=0;
-        console.log(trimValues.start)
         if(typeof(trimValues.start)==='string' && typeof(trimValues.end)==='string') {
             const start = parseInt(trimValues.start.substring(0, trimValues.start.length - 1));
             const end = parseInt(trimValues.end.substring(0, trimValues.end.length - 1));
@@ -76,9 +75,6 @@ export class AviatoAudio {
             if(trimValues.start[trimValues.start.length-1]==='s' && trimValues.end[trimValues.end.length-1]==='s'){
                 startIndex = Math.floor((start/this.audioBuffer.duration) * this.audioBuffer.length-1);
                 endIndex = Math.floor((end/this.audioBuffer.duration) * this.audioBuffer.length-1);
-                console.log('here')
-                console.log(startIndex);
-                console.log(endIndex)
             }
     
             else if(trimValues.start[trimValues.start.length-1]==='%' && trimValues.end[trimValues.end.length-1]==='%') {
@@ -89,7 +85,6 @@ export class AviatoAudio {
         }
 
         else {
-            console.log('here1')
             const {start,end} = trimValues;
             if(typeof(start)==='number' && typeof(end)==='number'){
                 startIndex = Math.floor((start) / 100 * this.audioBuffer.length);
@@ -173,8 +168,55 @@ export class AviatoAudio {
         const url = window.URL.createObjectURL(blob);
         return Promise.resolve(url)
     }
-    newfunc() {
-        console.log('newfunc')
+
+    cut(cutValues:{start:String|number,end:String|number}) {
+        let startIndex=0,endIndex=0;
+        if(typeof(cutValues.start)==='string' && typeof(cutValues.end)==='string') {
+            const start = parseInt(cutValues.start.substring(0, cutValues.start.length - 1));
+            const end = parseInt(cutValues.end.substring(0, cutValues.end.length - 1));
+    
+            if(cutValues.start[cutValues.start.length-1]==='s' && cutValues.end[cutValues.end.length-1]==='s'){
+                startIndex = Math.floor((start/this.audioBuffer.duration) * this.audioBuffer.length-1);
+                endIndex = Math.floor((end/this.audioBuffer.duration) * this.audioBuffer.length-1);
+            }
+    
+            else if(cutValues.start[cutValues.start.length-1]==='%' && cutValues.end[cutValues.end.length-1]==='%') {
+                startIndex = Math.floor((start) / 100 * this.audioBuffer.length);
+                endIndex = Math.floor((end) / 100 * this.audioBuffer.length);
+            }
+       
+        }
+
+        else {
+            const {start,end} = cutValues;
+            if(typeof(start)==='number' && typeof(end)==='number'){
+                startIndex = Math.floor((start) / 100 * this.audioBuffer.length);
+                endIndex = Math.floor((end) / 100 * this.audioBuffer.length);
+            }
+        }
+
+        const channels = this.audioBuffer.numberOfChannels;
+        const length = this.audioBuffer.length-(endIndex-startIndex+1);
+        const sampleRate = this.audioBuffer.sampleRate;
+        const newArrayBuffer = this.audioContext.createBuffer(channels,length,sampleRate);
+        for(let i=0;i<channels;i++) {
+            const newBufferChanneData = newArrayBuffer.getChannelData(i);
+            const thisBufferChannelData = this.audioBuffer.getChannelData(i);
+            let k=0;
+            for(let j=0;j<thisBufferChannelData.length;j++){
+                newBufferChanneData[k] = thisBufferChannelData[j];
+                if(j==startIndex-1) j=endIndex;
+                k++;
+            }
+        }
+        this.audioBuffer = newArrayBuffer;
+        this.audioNode.disconnect();
+        const newAudioNode = this.audioContext.createBufferSource();
+        newAudioNode.buffer = newArrayBuffer;
+        newAudioNode.connect(this.audioContext.destination);
+        this.audioNode = newAudioNode;
+        console.log(newArrayBuffer);
+
     }
 
 }
