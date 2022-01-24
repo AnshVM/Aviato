@@ -1,8 +1,4 @@
 /// <reference types="node" />
-interface trimValues {
-    start: String;
-    end: String;
-}
 export declare class AviatoAudio {
     audioElement: HTMLAudioElement;
     audioContext: AudioContext;
@@ -13,8 +9,11 @@ export declare class AviatoAudio {
     constructor(audioElement: HTMLAudioElement);
     play(): void;
     pause(): void;
-    trim(trimValues: trimValues): void;
+    trim(trimValues: {
+        start: String | number;
+        end: String | number;
+    }): void;
     append(audio: AviatoAudio): void;
-    convertToMP3(): String;
+    convertToMP3(): Promise<String>;
+    newfunc(): void;
 }
-export {};

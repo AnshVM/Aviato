@@ -1,11 +1,5 @@
 const lamejs = require('lamejs')
 
-
-interface trimValues {
-    start: String,
-    end: String
-}
-
 export class AviatoAudio {
     audioElement: HTMLAudioElement;
     audioContext: AudioContext;
@@ -15,7 +9,6 @@ export class AviatoAudio {
     durationInterval:NodeJS.Timer;
 
     constructor(audioElement: HTMLAudioElement) {
-        console.log('made a change')
         this.duration=0;
         this.audioElement = audioElement;
         this.audioContext = new AudioContext();
@@ -28,18 +21,15 @@ export class AviatoAudio {
                 this.audioNode = this.audioContext.createBufferSource();
                 this.audioNode.buffer = this.audioBuffer;
                 this.audioNode.connect(this.audioContext.destination);
-                console.log(audioBuffer)
-                console.log("Audio now ready to play")
             })
+        console.log('ready')
     }
 
     play() {
         if (this.audioContext.state === 'suspended') {
             this.audioContext.resume();
         }
-        console.log(this.audioNode)
         try{
-            console.log(this.duration);
             this.audioNode.start(0,this.duration);
         }catch(e){
             if(e.code===11){ //AudioBufferSourceNode can only be played once so a new one needs to be create in this case
@@ -48,18 +38,24 @@ export class AviatoAudio {
                     const nowBuffering = newArrayBuffer.getChannelData(i);
                     this.audioBuffer.copyFromChannel(nowBuffering,i,0);
                 }
-                console.log(newArrayBuffer);
                 const newAudioNode = this.audioContext.createBufferSource();
                 newAudioNode.buffer = newArrayBuffer;
                 this.audioNode.disconnect();
                 this.audioNode = newAudioNode;
                 this.audioNode.connect(this.audioContext.destination);
                 this.audioNode.start(0,this.duration);
+
             }
         }finally{
+            this.audioNode.onended = ()=>{
+                if(this.duration===Math.floor(this.audioBuffer.duration)){
+                    if(this.durationInterval) clearInterval(this.durationInterval);
+                    this.duration = 0;
+                }
+            }
             this.durationInterval = setInterval(()=>{
-                this.duration++;
-            },1000)
+                this.duration+=0.1;
+            },100)
         }
 
     }
@@ -67,14 +63,40 @@ export class AviatoAudio {
     pause() {
         this.audioNode.stop();
         clearInterval(this.durationInterval)
-        console.log(this.duration)
     }
+    
+    trim(trimValues:{start:String|number,end:String|number}) {
 
-    trim(trimValues: trimValues) {
-        const start = trimValues.start.substring(0, trimValues.start.length - 1);
-        const end = trimValues.end.substring(0, trimValues.end.length - 1);
-        const startIndex = Math.floor(parseInt(start) / 100 * this.audioBuffer.length);
-        const endIndex = Math.floor(parseInt(end) / 100 * this.audioBuffer.length);
+        let startIndex=0,endIndex=0;
+        console.log(trimValues.start)
+        if(typeof(trimValues.start)==='string' && typeof(trimValues.end)==='string') {
+            const start = parseInt(trimValues.start.substring(0, trimValues.start.length - 1));
+            const end = parseInt(trimValues.end.substring(0, trimValues.end.length - 1));
+    
+            if(trimValues.start[trimValues.start.length-1]==='s' && trimValues.end[trimValues.end.length-1]==='s'){
+                startIndex = Math.floor((start/this.audioBuffer.duration) * this.audioBuffer.length-1);
+                endIndex = Math.floor((end/this.audioBuffer.duration) * this.audioBuffer.length-1);
+                console.log('here')
+                console.log(startIndex);
+                console.log(endIndex)
+            }
+    
+            else if(trimValues.start[trimValues.start.length-1]==='%' && trimValues.end[trimValues.end.length-1]==='%') {
+                startIndex = Math.floor((start) / 100 * this.audioBuffer.length);
+                endIndex = Math.floor((end) / 100 * this.audioBuffer.length);
+            }
+       
+        }
+
+        else {
+            console.log('here1')
+            const {start,end} = trimValues;
+            if(typeof(start)==='number' && typeof(end)==='number'){
+                startIndex = Math.floor((start) / 100 * this.audioBuffer.length);
+                endIndex = Math.floor((end) / 100 * this.audioBuffer.length);
+            }
+        }
+
         const numChannels = this.audioBuffer.numberOfChannels;
         const length = endIndex - startIndex + 1;
         const sampleRate = this.audioBuffer.sampleRate
@@ -94,6 +116,7 @@ export class AviatoAudio {
         newAudioNode.buffer = newArrayBuffer;
         newAudioNode.connect(this.audioContext.destination);
         this.audioNode = newAudioNode;
+        console.log(this.audioBuffer)
     }
 
     append(audio:AviatoAudio){
@@ -120,11 +143,9 @@ export class AviatoAudio {
         newAudioNode.buffer = newArrayBuffer;
         newAudioNode.connect(this.audioContext.destination);
         this.audioNode = newAudioNode;
-        console.log("joined")
     }
 
-    convertToMP3():String{
-        const a = new Date();
+    convertToMP3():Promise<String>{
         const mp3encoder = new lamejs.Mp3Encoder(2,this.audioBuffer.sampleRate,128);
         let mp3data = [];
         const floatLeft = this.audioBuffer.getChannelData(0);
@@ -144,15 +165,16 @@ export class AviatoAudio {
                 mp3data.push(mp3buf);
             }
         }
-        console.log(`Encoding took ${((new Date()).getTime() - a.getTime())/1000} seconds`)
         const mp3buf = mp3encoder.flush();
         if(mp3buf.length>0){
             mp3data.push(mp3buf);
         }
         const blob = new Blob(mp3data,{type:'audio/mp3'});
         const url = window.URL.createObjectURL(blob);
-        console.log("converted")
-        return url
+        return Promise.resolve(url)
+    }
+    newfunc() {
+        console.log('newfunc')
     }
 
 }

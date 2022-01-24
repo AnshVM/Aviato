@@ -2,7 +2,6 @@ var lamejs = require('lamejs');
 var AviatoAudio = /** @class */ (function () {
     function AviatoAudio(audioElement) {
         var _this = this;
-        console.log('made a change');
         this.duration = 0;
         this.audioElement = audioElement;
         this.audioContext = new AudioContext();
@@ -15,18 +14,15 @@ var AviatoAudio = /** @class */ (function () {
             _this.audioNode = _this.audioContext.createBufferSource();
             _this.audioNode.buffer = _this.audioBuffer;
             _this.audioNode.connect(_this.audioContext.destination);
-            console.log(audioBuffer);
-            console.log("Audio now ready to play");
         });
+        console.log('ready');
     }
     AviatoAudio.prototype.play = function () {
         var _this = this;
         if (this.audioContext.state === 'suspended') {
             this.audioContext.resume();
         }
-        console.log(this.audioNode);
         try {
-            console.log(this.duration);
             this.audioNode.start(0, this.duration);
         }
         catch (e) {
@@ -36,7 +32,6 @@ var AviatoAudio = /** @class */ (function () {
                     var nowBuffering = newArrayBuffer.getChannelData(i);
                     this.audioBuffer.copyFromChannel(nowBuffering, i, 0);
                 }
-                console.log(newArrayBuffer);
                 var newAudioNode = this.audioContext.createBufferSource();
                 newAudioNode.buffer = newArrayBuffer;
                 this.audioNode.disconnect();
@@ -46,21 +41,48 @@ var AviatoAudio = /** @class */ (function () {
             }
         }
         finally {
+            this.audioNode.onended = function () {
+                if (_this.duration === Math.floor(_this.audioBuffer.duration)) {
+                    if (_this.durationInterval)
+                        clearInterval(_this.durationInterval);
+                    _this.duration = 0;
+                }
+            };
             this.durationInterval = setInterval(function () {
-                _this.duration++;
-            }, 1000);
+                _this.duration += 0.1;
+            }, 100);
         }
     };
     AviatoAudio.prototype.pause = function () {
         this.audioNode.stop();
         clearInterval(this.durationInterval);
-        console.log(this.duration);
     };
     AviatoAudio.prototype.trim = function (trimValues) {
-        var start = trimValues.start.substring(0, trimValues.start.length - 1);
-        var end = trimValues.end.substring(0, trimValues.end.length - 1);
-        var startIndex = Math.floor(parseInt(start) / 100 * this.audioBuffer.length);
-        var endIndex = Math.floor(parseInt(end) / 100 * this.audioBuffer.length);
+        var startIndex = 0, endIndex = 0;
+        console.log(trimValues.start);
+        if (typeof (trimValues.start) === 'string' && typeof (trimValues.end) === 'string') {
+            var start = parseInt(trimValues.start.substring(0, trimValues.start.length - 1));
+            var end = parseInt(trimValues.end.substring(0, trimValues.end.length - 1));
+            if (trimValues.start[trimValues.start.length - 1] === 's' && trimValues.end[trimValues.end.length - 1] === 's') {
+                startIndex = Math.floor((start / this.audioBuffer.duration) * this.audioBuffer.length - 1);
+                endIndex = Math.floor((end / this.audioBuffer.duration) * this.audioBuffer.length - 1);
+                console.log('here');
+                console.log(startIndex);
+                console.log(endIndex);
+            }
+            else if (trimValues.start[trimValues.start.length - 1] === '%' && trimValues.end[trimValues.end.length - 1] === '%') {
+                startIndex = Math.floor((start) / 100 * this.audioBuffer.length);
+                endIndex = Math.floor((end) / 100 * this.audioBuffer.length);
+            }
+        }
+        else {
+            console.log('here1');
+            var start = trimValues.start, end = trimValues.end;
+            if (typeof (start) === 'number' && typeof (end) === 'number') {
+                startIndex = Math.floor((start) / 100 * this.audioBuffer.length);
+                endIndex = Math.floor((end) / 100 * this.audioBuffer.length);
+            }
+        }
         var numChannels = this.audioBuffer.numberOfChannels;
         var length = endIndex - startIndex + 1;
         var sampleRate = this.audioBuffer.sampleRate;
@@ -80,6 +102,7 @@ var AviatoAudio = /** @class */ (function () {
         newAudioNode.buffer = newArrayBuffer;
         newAudioNode.connect(this.audioContext.destination);
         this.audioNode = newAudioNode;
+        console.log(this.audioBuffer);
     };
     AviatoAudio.prototype.append = function (audio) {
         var length = this.audioBuffer.length + audio.audioBuffer.length;
@@ -104,10 +127,8 @@ var AviatoAudio = /** @class */ (function () {
         newAudioNode.buffer = newArrayBuffer;
         newAudioNode.connect(this.audioContext.destination);
         this.audioNode = newAudioNode;
-        console.log("joined");
     };
     AviatoAudio.prototype.convertToMP3 = function () {
-        var a = new Date();
         var mp3encoder = new lamejs.Mp3Encoder(2, this.audioBuffer.sampleRate, 128);
         var mp3data = [];
         var floatLeft = this.audioBuffer.getChannelData(0);
@@ -127,15 +148,16 @@ var AviatoAudio = /** @class */ (function () {
                 mp3data.push(mp3buf_1);
             }
         }
-        console.log("Encoding took ".concat(((new Date()).getTime() - a.getTime()) / 1000, " seconds"));
         var mp3buf = mp3encoder.flush();
         if (mp3buf.length > 0) {
             mp3data.push(mp3buf);
         }
         var blob = new Blob(mp3data, { type: 'audio/mp3' });
         var url = window.URL.createObjectURL(blob);
-        console.log("converted");
-        return url;
+        return Promise.resolve(url);
+    };
+    AviatoAudio.prototype.newfunc = function () {
+        console.log('newfunc');
     };
     return AviatoAudio;
 }());
