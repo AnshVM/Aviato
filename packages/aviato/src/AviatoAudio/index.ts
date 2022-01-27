@@ -1,12 +1,12 @@
 const lamejs = require('lamejs')
 
 export class AviatoAudio {
-    audioElement: HTMLAudioElement;
-    audioContext: AudioContext;
-    audioNode: AudioBufferSourceNode;
-    audioBuffer: AudioBuffer;
+    private audioElement: HTMLAudioElement;
+    private audioContext: AudioContext;
+    private audioNode: AudioBufferSourceNode;
+    private audioBuffer: AudioBuffer;
     duration:number;
-    durationInterval:NodeJS.Timer;
+    private durationInterval:NodeJS.Timer;
 
     constructor(audioElement: HTMLAudioElement) {
         this.duration=0;

@@ -1,6 +1,6 @@
 {
   "name": "aviatojs",
-  "version": "1.0.4",
+  "version": "1.0.6",
   "description": "",
   "main": "./lib/cjs/index.js",
   "module": "./lib/esm/index.js",
