@@ -39,7 +39,7 @@ For a fully working example refer to [this example](https://github.com/AnshVM/Av
     //or
     audio2.cut({start:'5%',end:'10%'});
     //or
-    audio2.cut({start:5,end:10});
+    audio2.cut({start:5,end:10}); //also cuts by percentage
     
 ### Converting to mp3
 After performing trim,cut or append operations, you might want to convert the AviatoAudio object back to mp3 so that users can download the new audio file or something.
