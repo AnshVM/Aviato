@@ -5,7 +5,7 @@ export class AviatoAudio {
     private audioContext: AudioContext;
     private audioNode: AudioBufferSourceNode;
     private audioBuffer: AudioBuffer;
-    duration:number;
+    private duration:number;
     private durationInterval:NodeJS.Timer;
 
     constructor(audioElement: HTMLAudioElement) {
